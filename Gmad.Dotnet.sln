@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.29728.190
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gmad.CLI", "Gmad.CLI\Gmad.CLI.csproj", "{A0365A1B-6D8D-4346-BA9A-4BEF382F1CE4}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Gmad.Shared", "Gmad.Shared\Gmad.Shared.csproj", "{97A7D7C4-9BD1-4BB4-9858-BF492A7A5AEB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A0365A1B-6D8D-4346-BA9A-4BEF382F1CE4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A0365A1B-6D8D-4346-BA9A-4BEF382F1CE4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A0365A1B-6D8D-4346-BA9A-4BEF382F1CE4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A0365A1B-6D8D-4346-BA9A-4BEF382F1CE4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{97A7D7C4-9BD1-4BB4-9858-BF492A7A5AEB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{97A7D7C4-9BD1-4BB4-9858-BF492A7A5AEB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{97A7D7C4-9BD1-4BB4-9858-BF492A7A5AEB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{97A7D7C4-9BD1-4BB4-9858-BF492A7A5AEB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0EB8970A-FA5D-44D1-A74A-77D0FE31C67D}
+	EndGlobalSection
+EndGlobal
