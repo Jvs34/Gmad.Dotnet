@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "Gmad.CLI": {
+      "commandName": "Project",
+      "commandLineArgs": "create -folder \"E:/Games/Steam/steamapps/common/GarrysMod/garrysmod/addons/gmod_soccerball\""
+    }
+  }
+}

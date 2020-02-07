@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.IO;
 using System.Threading.Tasks;
+using Gmad.Shared;
 
 namespace Gmad.CLI
 {
@@ -12,7 +14,7 @@ namespace Gmad.CLI
 		private static Command CreateCommand { get; set; }
 		private static Command ExtractCommand { get; set; }
 
-		private static async Task<int> Main( string [] args )
+		private static async Task<int> Main( string[] args )
 		{
 			var createCommand = new Command( "create" )
 			{
@@ -63,7 +65,6 @@ namespace Gmad.CLI
 				},
 			};
 
-
 			extractCommand.Handler = CommandHandler.Create<FileInfo , DirectoryInfo>( ( file , folder ) =>
 			{
 				if( !file.Exists )
@@ -79,8 +80,15 @@ namespace Gmad.CLI
 
 			//TODO: drag and drop feeds the path of the file/folder as one of the arguments, need to validate it with the rootcommand system somehow
 			//is this gonna require a handler?
-			rootCommand.AddArgument( new Argument<FileInfo>( "the addon you want to extract" ) );
-			rootCommand.AddArgument( new Argument<DirectoryInfo>( "the folder you turn into an addon" ) );
+			rootCommand.AddArgument( new Argument<FileInfo>( "the addon you want to extract" )
+			{
+				IsHidden = true
+			} );
+			rootCommand.AddArgument( new Argument<DirectoryInfo>( "the folder you turn into an addon" )
+			{
+				IsHidden = true
+			} );
+
 			rootCommand.AddCommand( createCommand );
 			rootCommand.AddCommand( extractCommand );
 
@@ -100,25 +108,76 @@ namespace Gmad.CLI
 			} );
 
 
+
 			RootCommand = rootCommand;
 			CreateCommand = createCommand;
 			ExtractCommand = extractCommand;
 
 
 			//return await rootCommand.InvokeAsync( args );
-			await rootCommand.InvokeAsync( "create" );
+			await rootCommand.InvokeAsync( args );
 			Console.ReadLine();
 			return 0;
 		}
 
-		private static int CreateAddonFile( DirectoryInfo folder , FileInfo file , bool warninvalid = false )
+		private static int CreateAddonFile( DirectoryInfo folder , FileInfo fileOutput , bool warninvalid = false )
 		{
-			return 0;
+			if( fileOutput?.Exists != true )
+			{
+				//use the parent folder of the addon folder and create the gma there
+				fileOutput = new FileInfo( folder.FullName + ".gma" );
+			}
+
+			//TODO: read addon.json, if it's not available, create it
+
+			//open every file in the folder, then feed it as a string:stream dictionary
+			Dictionary<string , Stream> files = new Dictionary<string , Stream>();
+
+			foreach( var fileInput in folder.EnumerateFiles( "*" , SearchOption.AllDirectories ) )
+			{
+				//is this allowed by the wildcard? also the addon.json might have an ignore list already
+			}
+
+			//now open the stream for the output
+
+			using var outputStream = fileOutput.OpenWrite();
+
+			int successCode = Addon.Create( files , outputStream );
+
+			foreach( var kv in files )
+			{
+				kv.Value.Dispose();
+			}
+
+			return successCode;
 		}
 
-		private static int ExtractAddonFile( FileInfo file , DirectoryInfo folder )
+		private static int ExtractAddonFile( FileInfo file , DirectoryInfo folderOutput )
 		{
-			return 0;
+			if( folderOutput?.Exists != true )
+			{
+				folderOutput = new DirectoryInfo( Path.GetFileNameWithoutExtension( file.FullName ) );
+			}
+
+			using var inputStream = file.OpenRead();
+
+			Dictionary<string , Stream> files = new Dictionary<string , Stream>();
+
+			int successCode = Addon.Extract( inputStream , ( filePath ) =>
+			{
+				var fileStream = File.OpenWrite( Path.Combine( folderOutput.FullName , filePath ) );
+
+				files.Add( filePath , fileStream );
+
+				return fileStream;
+			} );
+
+			foreach( var kv in files )
+			{
+				kv.Value.Dispose();
+			}
+
+			return successCode;
 		}
 
 
