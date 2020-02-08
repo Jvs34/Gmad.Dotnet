@@ -12,6 +12,14 @@ namespace Gmad.CLI
 	{
 		private static async Task<int> Main( string[] args )
 		{
+			var warnInvalidOption = new Option( "-warninvalid" , "automatically skip invalid files" )
+			{
+				Argument = new Argument<bool>()
+				{
+					Arity = ArgumentArity.ZeroOrOne
+				} ,
+			};
+
 			var createCommand = new Command( "create" )
 			{
 				new Option( "-folder", "the folder to turn into an addon" )
@@ -29,13 +37,7 @@ namespace Gmad.CLI
 						Arity = ArgumentArity.ZeroOrOne
 					},
 				},
-				new Option( "-warninvalid" , "automatically skip invalid files" )
-				{
-					Argument = new Argument<bool>()
-					{
-						Arity = ArgumentArity.ZeroOrOne
-					} ,
-				},
+				warnInvalidOption
 			};
 
 			createCommand.Handler = CommandHandler.Create<DirectoryInfo , FileInfo , bool>( CreateAddonFile );
@@ -50,37 +52,53 @@ namespace Gmad.CLI
 				{
 					Argument = new Argument<DirectoryInfo>()
 				},
+				warnInvalidOption
 			};
 
-			extractCommand.Handler = CommandHandler.Create<FileInfo , DirectoryInfo>( ExtractAddonFile );
+			extractCommand.Handler = CommandHandler.Create<FileInfo , DirectoryInfo , bool>( ExtractAddonFile );
 
-			var rootCommand = new RootCommand();
+			var rootCommand = new RootCommand()
+			{
+				createCommand,
+				extractCommand,
+				new Argument<FileSystemInfo>( "target" ) //TODO: the name might need to be removed, dunno
+				{
+					IsHidden = true
+				}.ExistingOnly()
+			};
 
 			//TODO: drag and drop feeds the path of the file/folder as one of the arguments, need to validate it with the rootcommand system somehow
-			
-			rootCommand.AddArgument( new Argument<FileInfo>( "target" )
+			/*
+			rootCommand.AddArgument( new Argument<FileSystemInfo>( "target" ) //TODO: the name might need to be removed, dunno
 			{
 				IsHidden = true
 			}.ExistingOnly() );
 
 			rootCommand.AddCommand( createCommand );
 			rootCommand.AddCommand( extractCommand );
+			*/
 
-			rootCommand.Handler = CommandHandler.Create<FileSystemInfo>( ( target ) =>
+			rootCommand.Handler = CommandHandler.Create<FileSystemInfo>( HandleDragAndDrop );
+			return await rootCommand.InvokeAsync( args );
+		}
+
+		private static int HandleDragAndDrop( FileSystemInfo target )
+		{
+			switch( target )
 			{
-				if( target is FileInfo file && file.Exists )
+				case FileInfo file:
 				{
 					return ExtractAddonFile( file , new DirectoryInfo( "" ) );
 				}
-
-				if( target is DirectoryInfo folder && folder.Exists )
+				case DirectoryInfo folder:
 				{
 					return CreateAddonFile( folder , new FileInfo( "" ) );
 				}
-
-				return 0;
-			} );
-			return await rootCommand.InvokeAsync( args );
+				default:
+				{
+					return 0;
+				}
+			}
 		}
 
 		private static int CreateAddonFile( DirectoryInfo folder , FileInfo @out , bool warninvalid = false )
@@ -97,12 +115,32 @@ namespace Gmad.CLI
 
 			//TODO: read addon.json, if it's not available, create it
 
+			AddonInfo addonInfo = new AddonInfo();
+
 			//open every file in the folder, then feed it as a string:stream dictionary
 			Dictionary<string , Stream> files = new Dictionary<string , Stream>();
 
 			foreach( var fileInput in folder.EnumerateFiles( "*" , SearchOption.AllDirectories ) )
 			{
+				//turn the file paths into relatives
+				string relativeFilePath = Path.GetRelativePath( folder.FullName , fileInput.FullName );
+
 				//is this allowed by the wildcard? also the addon.json might have an ignore list already
+
+				if( !Addon.IsPathAllowed( relativeFilePath , addonInfo.IgnoreWildcard ) )
+				{
+					if( warninvalid )
+					{
+						Console.WriteLine( $"WAH {relativeFilePath} is BAD PATH" );
+					}
+					continue;
+				}
+
+				var fileInputStream = fileInput.OpenRead();
+
+				//TODO: change the slashes of the relativeFilePath to whatever gmad uses internally?
+
+				files.Add( relativeFilePath , fileInputStream );
 			}
 
 			//now open the stream for the output
@@ -119,7 +157,7 @@ namespace Gmad.CLI
 			return successCode;
 		}
 
-		private static int ExtractAddonFile( FileInfo file , DirectoryInfo @out )
+		private static int ExtractAddonFile( FileInfo file , DirectoryInfo @out , bool warninvalid = false )
 		{
 			//see CreateAddonFile above for the name reason
 			var folderOutput = @out;
@@ -127,6 +165,11 @@ namespace Gmad.CLI
 			if( folderOutput?.Exists != true )
 			{
 				folderOutput = new DirectoryInfo( Path.GetFileNameWithoutExtension( file.FullName ) );
+
+				if( !folderOutput.Exists )
+				{
+					folderOutput.Create();
+				}
 			}
 
 			using var inputStream = file.OpenRead();
