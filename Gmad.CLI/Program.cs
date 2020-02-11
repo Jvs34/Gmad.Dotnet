@@ -12,6 +12,9 @@ namespace Gmad.CLI
 	{
 		private static async Task<int> Main( string[] args )
 		{
+			//bool b = Addon.IsPathAllowed( "lua/effects/soccerball_explode.lua" , "lua/*.lua" );
+			//return 0;
+
 			var warnInvalidOption = new Option( "-warninvalid" , "automatically skip invalid files" )
 			{
 				Argument = new Argument<bool>()
@@ -67,6 +70,7 @@ namespace Gmad.CLI
 				}.ExistingOnly()
 			};
 
+			//commented because it was simplied above
 			//TODO: drag and drop feeds the path of the file/folder as one of the arguments, need to validate it with the rootcommand system somehow
 			/*
 			rootCommand.AddArgument( new Argument<FileSystemInfo>( "target" ) //TODO: the name might need to be removed, dunno
@@ -96,7 +100,7 @@ namespace Gmad.CLI
 				}
 				default:
 				{
-					return 0;
+					return 1;
 				}
 			}
 		}
@@ -117,13 +121,18 @@ namespace Gmad.CLI
 
 			AddonInfo addonInfo = new AddonInfo();
 
+
+
 			//open every file in the folder, then feed it as a string:stream dictionary
 			Dictionary<string , Stream> files = new Dictionary<string , Stream>();
 
+
 			foreach( var fileInput in folder.EnumerateFiles( "*" , SearchOption.AllDirectories ) )
 			{
-				//turn the file paths into relatives
-				string relativeFilePath = Path.GetRelativePath( folder.FullName , fileInput.FullName );
+				//turn the file paths into relatives and also lowercase
+				string relativeFilePath = Path.GetRelativePath( folder.FullName , fileInput.FullName ).ToLower();
+
+				relativeFilePath = relativeFilePath.Replace( "\\" , "/" );
 
 				//is this allowed by the wildcard? also the addon.json might have an ignore list already
 
@@ -131,16 +140,20 @@ namespace Gmad.CLI
 				{
 					if( warninvalid )
 					{
-						Console.WriteLine( $"WAH {relativeFilePath} is BAD PATH" );
+						Console.WriteLine( $"{relativeFilePath} \t\t[Not allowed by whitelist]" );
 					}
 					continue;
 				}
 
 				var fileInputStream = fileInput.OpenRead();
 
-				//TODO: change the slashes of the relativeFilePath to whatever gmad uses internally?
-
 				files.Add( relativeFilePath , fileInputStream );
+			}
+
+			if( files.Count == 0 )
+			{
+				Console.WriteLine( "No files found, can't continue!" );
+				return 1;
 			}
 
 			//now open the stream for the output
@@ -152,6 +165,11 @@ namespace Gmad.CLI
 			foreach( var kv in files )
 			{
 				kv.Value.Dispose();
+			}
+
+			if( successCode == 0 )
+			{
+				Console.WriteLine( $"Successfully saved to {fileOutput.FullName}" );
 			}
 
 			return successCode;

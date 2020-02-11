@@ -6,7 +6,7 @@ namespace Gmad.Shared
 {
 	public static partial class Addon
 	{
-		public static List<string> Wildcards { get; } = new List<string>()
+		public static IReadOnlyList<string> Wildcards { get; } = new List<string>()
 		{
 			"lua/*.lua",
 			"scenes/*.vcd",
@@ -74,27 +74,117 @@ namespace Gmad.Shared
 			{
 				foreach( var wildcard in ignoreWildcard )
 				{
-					if( !IsPathAllowed( path , wildcard ) )
+					if( IsPathAllowed( path , wildcard ) )
 					{
-						return false;
+						return true;
 					}
 				}
 			}
 
 			foreach( var wildcard in Wildcards )
 			{
-				if( !IsPathAllowed( path , wildcard ) )
+				if( IsPathAllowed( path , wildcard ) )
 				{
-					return false;
+					return true;
 				}
 			}
 
-			return true;
+			return false;
 		}
 
-		public static bool IsPathAllowed( string path , string wildcard )
+		public static bool IsPathAllowed( string str , string wildcard )
 		{
-			return true;
+			int strIndex = 0;
+			int wildIndex = 0;
+
+			while( strIndex < str.Length && wildcard[wildIndex] != '*' )
+			{
+				if( !wildcard[wildIndex] == str[strIndex] && wildcard[wildIndex] != '?' )
+				{
+					return false;
+				}
+				wildIndex++;
+				strIndex++;
+			}
+
+			int cp = 0;
+			int mp = 0;
+
+			while( strIndex < str.Length )
+			{
+				if( wildcard[wildIndex] == '*' )
+				{
+					if( ++wildIndex >= wildcard.Length )
+					{
+						return true;
+					}
+					mp = wildIndex;
+					cp = strIndex + 1;
+				}
+				else if( wildcard[wildIndex] == str[strIndex] || wildcard[wildIndex] == '?' )
+				{
+					wildIndex++;
+					strIndex++;
+				}
+				else
+				{
+					wildIndex = mp;
+					strIndex = cp++;
+				}
+			}
+
+			while( wildIndex < wildcard.Length && wildcard[wildIndex] == '*' )
+			{
+				wildIndex++;
+			}
+
+			return wildIndex >= wildcard.Length;
+
+			/*
+				const char *cp = 0, *mp = 0;
+
+				while ((*string) && (*wild != '*')) {
+					if ((*wild != *string) && (*wild != '?')) {
+						return false;
+					}
+					wild++;
+					string++;
+				}
+			 */
+
+			/*
+			 * globber( const char * string , const char * wild )
+			const char *cp = 0, *mp = 0;
+
+			while ((*string) && (*wild != '*')) {
+				if ((*wild != *string) && (*wild != '?')) {
+					return false;
+				}
+				wild++;
+				string++;
+			}
+
+			while (*string) {
+				if (*wild == '*') {
+					if (!*++wild) {
+						return true;
+					}
+					mp = wild;
+					cp = string+1;
+				} else if ((*wild == *string) || (*wild == '?')) {
+					wild++;
+					string++;
+				} else {
+					wild = mp;
+					string = cp++;
+				}
+			}
+
+			while (*wild == '*') {
+				wild++;
+			}
+			return !*wild;
+			*/
 		}
 	}
 }
