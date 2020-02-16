@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Gmad.Shared
@@ -69,7 +70,10 @@ namespace Gmad.Shared
 
 		public static bool IsPathAllowed( string path , List<string> ignoreWildcard = null )
 		{
-			//TODO: find a way to condense this without garbage
+			return Wildcards.Concat( ignoreWildcard )
+				.Any( wildcard => IsPathAllowed( path , wildcard ) );
+			
+			/*
 			if( ignoreWildcard != null )
 			{
 				foreach( var wildcard in ignoreWildcard )
@@ -88,8 +92,8 @@ namespace Gmad.Shared
 					return true;
 				}
 			}
-
-			return false;
+			*/
+			//return false;
 		}
 
 		public static bool IsPathAllowed( string str , string wildcard )
@@ -99,7 +103,7 @@ namespace Gmad.Shared
 
 			while( strIndex < str.Length && wildcard[wildIndex] != '*' )
 			{
-				if( !wildcard[wildIndex] == str[strIndex] && wildcard[wildIndex] != '?' )
+				if( wildcard[wildIndex] != str[strIndex] && wildcard[wildIndex] != '?' )
 				{
 					return false;
 				}
