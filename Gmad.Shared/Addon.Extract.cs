@@ -1,9 +1,9 @@
-﻿using Gmad.Shared.Extensions;
+﻿using Epoch.net;
+using Gmad.Shared.Extensions;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 
 namespace Gmad.Shared
 {
@@ -36,6 +36,8 @@ namespace Gmad.Shared
 
 				ulong steamid = reader.ReadUInt64(); //steamid
 				ulong timestamp = reader.ReadUInt64(); //timestamp
+
+				var timeUpdated = new EpochTime( (int) timestamp ).DateTime;
 
 				if( gmadFormatVersion > 1 )
 				{
@@ -100,12 +102,19 @@ namespace Gmad.Shared
 				}
 
 				uint addoncrc = reader.ReadUInt32(); //not used during the extraction of gmas
+
+				addonInfo.Title = gmadTitle;
+				PopulateFromDescription( addonInfo , gmadAddonJson );
+
 			}
+
 
 
 
 
 			return true;
 		}
+
+
 	}
 }

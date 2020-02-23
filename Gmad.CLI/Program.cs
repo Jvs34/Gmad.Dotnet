@@ -225,16 +225,15 @@ namespace Gmad.CLI
 
 		private static AddonInfo OpenJSON( FileInfo jsonFile )
 		{
-			AddonInfo addonInfo = new AddonInfo();
-
-
-
-			return addonInfo;
+			using var fileStream = jsonFile.OpenRead();
+			return Addon.LoadAddonInfo( fileStream );
 		}
 
 		private static void SaveJSON( FileInfo jsonFile , AddonInfo addonInfo )
 		{
+			using var fileStream = jsonFile.OpenWrite();
 
+			Addon.SaveAddonInfo( addonInfo , fileStream );
 		}
 	}
 }
