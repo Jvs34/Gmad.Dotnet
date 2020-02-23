@@ -98,6 +98,8 @@ namespace Gmad.Shared
 						inputStream.CopyToLimited( stream , entry.Size );
 					}
 				}
+
+				uint addoncrc = reader.ReadUInt32(); //not used during the extraction of gmas
 			}
 
 

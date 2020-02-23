@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Gmad.Shared.NewAPI
 {
@@ -42,7 +43,17 @@ namespace Gmad.Shared.NewAPI
 
 		}
 
+		public async Task SaveToStreamAsync( Stream fileStream )
+		{
+
+		}
+
 		public void Extract()
+		{
+
+		}
+
+		public async Task ExtractAsync()
 		{
 
 		}

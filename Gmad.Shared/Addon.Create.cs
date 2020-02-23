@@ -12,9 +12,14 @@ namespace Gmad.Shared
 			using( BinaryWriter buffer = new BinaryWriter( outputStream ) )
 			{
 				buffer.Write( Ident.ToCharArray() );
+				
 				buffer.Write( ( char ) Version );
-				buffer.Write( ( ulong ) 0 );
-				//buffer.Write(  (ulong)  )
+				
+				buffer.Write( ( ulong ) 0 ); //steamid
+				
+				buffer.Write( ( ulong ) 0 ); //TODO: unix timestamp
+
+				buffer.Write( ( char ) 0 ); //required content, this hasn't been worked on
 			}
 
 
