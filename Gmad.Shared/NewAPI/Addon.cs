@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 
-namespace Gmad.Shared
+namespace Gmad.Shared.NewAPI
 {
-	public class AddonInfo
+	public class Addon
 	{
 		public string Title { get; set; }
 		public string Description { get; set; }
@@ -20,6 +21,30 @@ namespace Gmad.Shared
 		/// </summary>
 		public string LogoImage { get; set; }
 		public List<string> Tags { get; set; }
+
+		/// <summary>
+		/// Only used by Falco's gmosh I think
+		/// </summary>
 		public List<string> IgnoreWildcard { get; set; }
+
+		public void AddFile( string relativePath , Stream fileStream )
+		{
+
+		}
+
+		public void RemoveFile( string relativePath )
+		{
+
+		}
+
+		public void SaveToStream( Stream fileStream )
+		{
+
+		}
+
+		public void Extract()
+		{
+
+		}
 	}
 }

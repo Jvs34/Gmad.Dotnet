@@ -70,18 +70,6 @@ namespace Gmad.CLI
 				}.ExistingOnly()
 			};
 
-			//commented because it was simplied above
-			//TODO: drag and drop feeds the path of the file/folder as one of the arguments, need to validate it with the rootcommand system somehow
-			/*
-			rootCommand.AddArgument( new Argument<FileSystemInfo>( "target" ) //TODO: the name might need to be removed, dunno
-			{
-				IsHidden = true
-			}.ExistingOnly() );
-
-			rootCommand.AddCommand( createCommand );
-			rootCommand.AddCommand( extractCommand );
-			*/
-
 			rootCommand.Handler = CommandHandler.Create<FileSystemInfo>( HandleDragAndDrop );
 			return await rootCommand.InvokeAsync( args );
 		}
@@ -109,23 +97,15 @@ namespace Gmad.CLI
 		{
 			//unfortunately, the binding for the function in system.commandline is based on names of the Options stripped from dashes and case sensitive stuff
 			//so to keep my sanity I'm going to rename this one
-			var fileOutput = @out;
-
-			if( fileOutput is null )
-			{
-				//use the parent folder of the addon folder and create the gma there
-				fileOutput = new FileInfo( folder.FullName + ".gma" );
-			}
-
+			var fileOutput = @out ?? new FileInfo( folder.FullName + ".gma" );
 			//TODO: read addon.json, if it's not available, create it
 
-			AddonInfo addonInfo = new AddonInfo();
+			var jsonFileInfo = new FileInfo( Path.Combine( folder.FullName , "addon.json" ) );
 
-
+			AddonInfo addonInfo = OpenJSON( jsonFileInfo );
 
 			//open every file in the folder, then feed it as a string:stream dictionary
 			Dictionary<string , Stream> files = new Dictionary<string , Stream>();
-
 
 			foreach( var fileInput in folder.EnumerateFiles( "*" , SearchOption.AllDirectories ) )
 			{
@@ -136,13 +116,22 @@ namespace Gmad.CLI
 
 				//is this allowed by the wildcard? also the addon.json might have an ignore list already
 
-				if( !Addon.IsPathAllowed( relativeFilePath , addonInfo.IgnoreWildcard ) )
+				//first check if we can simply ignore this
+
+				if( addonInfo.IgnoreWildcard != null && Addon.IsWildcardMatching( relativeFilePath , addonInfo.IgnoreWildcard ) )
+				{
+					continue;
+				}
+
+				//if it's not ignored and still not allowed, throw out an error
+
+				if( !Addon.IsPathAllowed( relativeFilePath ) )
 				{
 					if( warninvalid )
 					{
 						Console.WriteLine( $"{relativeFilePath} \t\t[Not allowed by whitelist]" );
 					}
-					continue;
+					return 1;
 				}
 
 				var fileInputStream = fileInput.OpenRead();
@@ -157,22 +146,25 @@ namespace Gmad.CLI
 			}
 
 			//now open the stream for the output
+			bool success;
 
-			using var outputStream = fileOutput.OpenWrite();
-
-			int successCode = Addon.Create( files , outputStream );
+			using( var outputStream = fileOutput.OpenWrite() )
+			{
+				success = Addon.Create( files , outputStream , addonInfo );
+			}
 
 			foreach( var kv in files )
 			{
-				kv.Value.Dispose();
+				kv.Value?.Dispose();
 			}
 
-			if( successCode == 0 )
+			if( success )
 			{
+				SaveJSON( jsonFileInfo , addonInfo );
 				Console.WriteLine( $"Successfully saved to {fileOutput.FullName}" );
 			}
 
-			return successCode;
+			return Convert.ToInt32( !success );
 		}
 
 		private static int ExtractAddonFile( FileInfo file , DirectoryInfo @out , bool warninvalid = false )
@@ -180,23 +172,30 @@ namespace Gmad.CLI
 			//see CreateAddonFile above for the name reason
 			var folderOutput = @out;
 
-			if( folderOutput?.Exists != true )
+			if( folderOutput == null )
 			{
 				folderOutput = new DirectoryInfo( Path.GetFileNameWithoutExtension( file.FullName ) );
+			}
 
-				if( !folderOutput.Exists )
-				{
-					folderOutput.Create();
-				}
+			if( !folderOutput.Exists )
+			{
+				folderOutput.Create();
 			}
 
 			using var inputStream = file.OpenRead();
 
 			Dictionary<string , Stream> files = new Dictionary<string , Stream>();
 
-			int successCode = Addon.Extract( inputStream , ( filePath ) =>
+			var jsonFileInfo = new FileInfo( Path.Combine( folderOutput.FullName , "addon.json" ) );
+			AddonInfo addonInfo = new AddonInfo();
+
+			bool success = Addon.Extract( inputStream , ( filePath ) =>
 			{
 				var outputFileInfo = new FileInfo( Path.Combine( folderOutput.FullName , filePath ) );
+
+				//create the subfolder first
+
+				outputFileInfo.Directory.Create();
 
 				if( !outputFileInfo.FullName.Contains( folderOutput.FullName ) )
 				{
@@ -208,16 +207,34 @@ namespace Gmad.CLI
 				files.Add( filePath , fileStream );
 
 				return fileStream;
-			} );
+			} , addonInfo );
 
 			foreach( var kv in files )
 			{
 				kv.Value.Dispose();
 			}
 
-			return successCode;
+			if( success )
+			{
+				SaveJSON( jsonFileInfo , addonInfo );
+			}
+
+			return Convert.ToInt32( !success );
 		}
 
 
+		private static AddonInfo OpenJSON( FileInfo jsonFile )
+		{
+			AddonInfo addonInfo = new AddonInfo();
+
+
+
+			return addonInfo;
+		}
+
+		private static void SaveJSON( FileInfo jsonFile , AddonInfo addonInfo )
+		{
+
+		}
 	}
 }

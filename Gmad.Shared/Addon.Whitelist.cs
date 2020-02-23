@@ -67,36 +67,23 @@ namespace Gmad.Shared
 			"gamemodes/*/content/sound/*.ogg",
 		};
 
-
-		public static bool IsPathAllowed( string path , List<string> ignoreWildcard = null )
+		public static bool IsPathAllowed( string path )
 		{
-			return Wildcards.Concat( ignoreWildcard )
-				.Any( wildcard => IsPathAllowed( path , wildcard ) );
-			
-			/*
-			if( ignoreWildcard != null )
-			{
-				foreach( var wildcard in ignoreWildcard )
-				{
-					if( IsPathAllowed( path , wildcard ) )
-					{
-						return true;
-					}
-				}
-			}
-
-			foreach( var wildcard in Wildcards )
-			{
-				if( IsPathAllowed( path , wildcard ) )
-				{
-					return true;
-				}
-			}
-			*/
-			//return false;
+			return IsWildcardMatching( path , Wildcards );
 		}
 
-		public static bool IsPathAllowed( string str , string wildcard )
+		public static bool IsWildcardMatching( string path , IEnumerable<string> wildcardList )
+		{
+			return wildcardList?.Any( wildcard => IsWildcardMatching( path , wildcard ) ) == true;
+		}
+
+		/// <summary>
+		/// Uses the same code behind GMAD's c++ implementation (a third party function called globber)
+		/// </summary>
+		/// <param name="str">preferably a relative path</param>
+		/// <param name="wildcard">the wildcard to match to, can contain * and ?</param>
+		/// <returns></returns>
+		public static bool IsWildcardMatching( string str , string wildcard )
 		{
 			int strIndex = 0;
 			int wildIndex = 0;

@@ -38,10 +38,5 @@ namespace Gmad.Shared
 			"comic",
 			"build"
 		};
-
-		public struct Header
-		{
-			public char[] Ident;
-		}
 	}
 }

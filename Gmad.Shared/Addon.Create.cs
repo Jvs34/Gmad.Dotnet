@@ -7,7 +7,7 @@ namespace Gmad.Shared
 {
 	public static partial class Addon
 	{
-		public static int Create( Dictionary<string , Stream> files , Stream outputStream )
+		public static bool Create( Dictionary<string , Stream> files , Stream outputStream , AddonInfo addonInfo )
 		{
 			using( BinaryWriter buffer = new BinaryWriter( outputStream ) )
 			{
@@ -18,7 +18,7 @@ namespace Gmad.Shared
 			}
 
 
-			return 0;
+			return true;
 		}
 	}
 }
