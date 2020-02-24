@@ -28,7 +28,9 @@ namespace Gmad.Shared
 
 				buffer.WriteBootilString( addonInfo.Title );
 
-				buffer.WriteBootilString( string.Empty ); //TODO: this is json built with description, type and tags values, how will we handle this?
+				string jsonDescription = CreateJsonDescription( addonInfo );
+
+				buffer.WriteBootilString( jsonDescription ); //TODO: this is json built with description, type and tags values, how will we handle this?
 
 				buffer.WriteBootilString( "Author Name" ); //unused author name
 

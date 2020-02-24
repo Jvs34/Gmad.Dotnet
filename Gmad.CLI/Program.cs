@@ -115,8 +115,7 @@ namespace Gmad.CLI
 
 				relativeFilePath = relativeFilePath.Replace( "\\" , "/" );
 
-				//is this allowed by the wildcard? also the addon.json might have an ignore list already
-
+				
 				//this could PROBABLY be streamlined in a Addon.IsIgnoreMatching function but for now I just want this to work
 
 				if( Addon.IsWildcardMatching( relativeFilePath , Addon.DefaultIgnores ) )
@@ -188,7 +187,7 @@ namespace Gmad.CLI
 				folderOutput.Create();
 			}
 
-			using var inputStream = file.OpenRead();
+			using var gmadFileStream = file.OpenRead();
 
 			Dictionary<string , Stream> files = new Dictionary<string , Stream>();
 
@@ -197,7 +196,7 @@ namespace Gmad.CLI
 			//in case of re-extraction, we don't want to overwrite a manually written json for whatever reason
 			AddonInfo addonInfo = OpenJSON( jsonFileInfo ) ?? new AddonInfo();
 
-			bool success = Addon.Extract( inputStream , ( filePath ) =>
+			bool success = Addon.Extract( gmadFileStream , ( filePath ) =>
 			{
 				var outputFileInfo = new FileInfo( Path.Combine( folderOutput.FullName , filePath ) );
 
@@ -205,7 +204,7 @@ namespace Gmad.CLI
 
 				outputFileInfo.Directory.Create();
 
-				if( !outputFileInfo.FullName.Contains( folderOutput.FullName ) )
+				if( !outputFileInfo.FullName.StartsWith( folderOutput.FullName ) )
 				{
 					throw new IOException( $"Addon extraction somehow ended up outside main folder {outputFileInfo.FullName}" );
 				}

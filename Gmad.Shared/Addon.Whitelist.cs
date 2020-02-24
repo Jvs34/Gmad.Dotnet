@@ -102,6 +102,9 @@ namespace Gmad.Shared
 		/// <returns></returns>
 		public static bool IsWildcardMatching( string str , string wildcard )
 		{
+			str = str.ToLower();
+			wildcard = wildcard.ToLower();
+
 			int strIndex = 0;
 			int wildIndex = 0;
 
