@@ -3,15 +3,27 @@ using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.IO;
+using System.Text;
 using System.Threading.Tasks;
 using Gmad.Shared;
+using Newtonsoft.Json;
 
 namespace Gmad.CLI
 {
 	internal static class Program
 	{
+		private static JsonSerializer AddonJsonSerializer { get; } = new JsonSerializer()
+		{
+			Formatting = Formatting.Indented ,
+			NullValueHandling = NullValueHandling.Ignore ,
+			ContractResolver = new AddonInfoContractResolver() ,
+		};
+
 		private static async Task<int> Main( string[] args )
 		{
+			Addon.DeserializeAddonInfoCallback = DeserializeAddonInfo;
+			Addon.SerializeAddonInfoToStringCallback = SerializeAddonInfoToString;
+
 			//bool b = Addon.IsPathAllowed( "lua/effects/soccerball_explode.lua" , "lua/*.lua" );
 			//return 0;
 
@@ -74,6 +86,7 @@ namespace Gmad.CLI
 			return await rootCommand.InvokeAsync( args );
 		}
 
+
 		private static int HandleDragAndDrop( FileSystemInfo target )
 		{
 			switch( target )
@@ -102,7 +115,7 @@ namespace Gmad.CLI
 
 			var jsonFileInfo = new FileInfo( Path.Combine( folder.FullName , "addon.json" ) );
 
-			AddonInfo addonInfo = OpenJSON( jsonFileInfo );
+			AddonInfo addonInfo = OpenAddonInfo( jsonFileInfo );
 
 			//open every file in the folder, then feed it as a string:stream dictionary
 			Dictionary<string , Stream> files = new Dictionary<string , Stream>();
@@ -114,7 +127,7 @@ namespace Gmad.CLI
 
 				relativeFilePath = relativeFilePath.Replace( "\\" , "/" );
 
-				
+
 				//this could PROBABLY be streamlined in a Addon.IsIgnoreMatching function but for now I just want this to work
 
 				if( Addon.IsWildcardMatching( relativeFilePath , Addon.DefaultIgnores ) )
@@ -164,7 +177,7 @@ namespace Gmad.CLI
 
 			if( success )
 			{
-				SaveJSON( jsonFileInfo , addonInfo );
+				SaveAddonInfo( jsonFileInfo , addonInfo );
 				Console.WriteLine( $"Successfully saved to {fileOutput.FullName}" );
 			}
 
@@ -193,7 +206,7 @@ namespace Gmad.CLI
 			var jsonFileInfo = new FileInfo( Path.Combine( folderOutput.FullName , "addon.json" ) );
 
 			//in case of re-extraction, we don't want to overwrite a manually written json for whatever reason
-			AddonInfo addonInfo = OpenJSON( jsonFileInfo ) ?? new AddonInfo();
+			AddonInfo addonInfo = OpenAddonInfo( jsonFileInfo ) ?? new AddonInfo();
 
 			bool success = Addon.Extract( gmadFileStream , ( filePath ) =>
 			{
@@ -222,14 +235,13 @@ namespace Gmad.CLI
 
 			if( success )
 			{
-				SaveJSON( jsonFileInfo , addonInfo );
+				SaveAddonInfo( jsonFileInfo , addonInfo );
 			}
 
 			return Convert.ToInt32( !success );
 		}
 
-
-		private static AddonInfo OpenJSON( FileInfo jsonFile )
+		private static AddonInfo OpenAddonInfo( FileInfo jsonFile )
 		{
 			if( !jsonFile.Exists )
 			{
@@ -237,14 +249,44 @@ namespace Gmad.CLI
 			}
 
 			using var fileStream = jsonFile.OpenRead();
-			return Addon.LoadAddonInfo( fileStream );
+
+			AddonInfo addonInfo = new AddonInfo();
+
+			using( var reader = new StreamReader( fileStream ) )
+			using( var jsonReader = new JsonTextReader( reader ) )
+			{
+				addonInfo = AddonJsonSerializer.Deserialize<AddonInfo>( jsonReader );
+			}
+
+			return addonInfo;
 		}
 
-		private static void SaveJSON( FileInfo jsonFile , AddonInfo addonInfo )
+		private static void SaveAddonInfo( FileInfo jsonFile , AddonInfo addonInfo )
 		{
 			using var fileStream = jsonFile.CreateText();
 
-			Addon.SaveAddonInfo( addonInfo , fileStream );
+			using( var writer = new JsonTextWriter( fileStream ) )
+			{
+				AddonJsonSerializer.Serialize( writer , addonInfo );
+			}
+		}
+
+		private static string SerializeAddonInfoToString( AddonInfo addonInfo )
+		{
+			var stringOutputBuilder = new StringBuilder();
+			using( var stringWriter = new StringWriter( stringOutputBuilder ) )
+			using( var jsonWriter = new JsonTextWriter( stringWriter ) )
+			{
+				AddonJsonSerializer.Serialize( jsonWriter , addonInfo );
+			}
+			return stringOutputBuilder.ToString();
+		}
+
+		private static AddonInfo DeserializeAddonInfo( string jsonStr )
+		{
+			using var reader = new StringReader( jsonStr );
+			using var jsonReader = new JsonTextReader( reader );
+			return AddonJsonSerializer.Deserialize<AddonInfo>( jsonReader );
 		}
 	}
 }
