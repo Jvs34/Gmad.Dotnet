@@ -30,7 +30,7 @@ namespace Gmad.Shared
 
 				string jsonDescription = CreateJsonDescription( addonInfo );
 
-				buffer.WriteBootilString( jsonDescription ); //TODO: this is json built with description, type and tags values, how will we handle this?
+				buffer.WriteBootilString( jsonDescription );
 
 				buffer.WriteBootilString( "Author Name" ); //unused author name
 
@@ -39,7 +39,7 @@ namespace Gmad.Shared
 				uint fileNum = 0;
 				foreach( var filesToAdd in orderedFiles )
 				{
-					uint crc = 0; //TODO: crc
+					uint crc = 0; //Willox mentioned that CRC is never used even in gmod itself, cool
 					long size = filesToAdd.Value.Length;
 					fileNum++;
 					buffer.Write( fileNum );
@@ -57,7 +57,7 @@ namespace Gmad.Shared
 					stream.CopyToLimited( outputStream , stream.Length );
 				}
 
-				//TODO: write CRC32
+				//don't write CRC32 as it's not used anywhere
 				buffer.Write( ( uint ) 0 );
 			}
 

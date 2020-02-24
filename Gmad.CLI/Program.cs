@@ -99,7 +99,6 @@ namespace Gmad.CLI
 			//unfortunately, the binding for the function in system.commandline is based on names of the Options stripped from dashes and case sensitive stuff
 			//so to keep my sanity I'm going to rename this one
 			var fileOutput = @out ?? new FileInfo( folder.FullName + ".gma" );
-			//TODO: read addon.json, if it's not available, create it
 
 			var jsonFileInfo = new FileInfo( Path.Combine( folder.FullName , "addon.json" ) );
 

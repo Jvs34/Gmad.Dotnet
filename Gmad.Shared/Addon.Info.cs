@@ -10,6 +10,7 @@ namespace Gmad.Shared
 {
 	public static partial class Addon
 	{
+		//TODO: move these functions to implementable lambdas so people can use their own json library
 		public static IReadOnlyList<string> AllowedDescriptionProperties { get; } = new List<string>()
 		{
 			"description",
