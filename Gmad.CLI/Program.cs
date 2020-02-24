@@ -88,6 +88,7 @@ namespace Gmad.CLI
 				}
 				default:
 				{
+					Console.Error.WriteLine( "Cannot handle drag and drop action." );
 					return 1;
 				}
 			}
@@ -116,7 +117,12 @@ namespace Gmad.CLI
 
 				//is this allowed by the wildcard? also the addon.json might have an ignore list already
 
-				//first check if we can simply ignore this
+				//this could PROBABLY be streamlined in a Addon.IsIgnoreMatching function but for now I just want this to work
+
+				if( Addon.IsWildcardMatching( relativeFilePath , Addon.DefaultIgnores ) )
+				{
+					continue;
+				}
 
 				if( addonInfo.IgnoreWildcard != null && Addon.IsWildcardMatching( relativeFilePath , addonInfo.IgnoreWildcard ) )
 				{
@@ -129,7 +135,7 @@ namespace Gmad.CLI
 				{
 					if( warninvalid )
 					{
-						Console.WriteLine( $"{relativeFilePath} \t\t[Not allowed by whitelist]" );
+						Console.Error.WriteLine( $"{relativeFilePath} \t\t[Not allowed by whitelist]" );
 					}
 					return 1;
 				}
@@ -141,7 +147,7 @@ namespace Gmad.CLI
 
 			if( files.Count == 0 )
 			{
-				Console.WriteLine( "No files found, can't continue!" );
+				Console.Error.WriteLine( "No files found, can't continue!" );
 				return 1;
 			}
 
@@ -187,7 +193,9 @@ namespace Gmad.CLI
 			Dictionary<string , Stream> files = new Dictionary<string , Stream>();
 
 			var jsonFileInfo = new FileInfo( Path.Combine( folderOutput.FullName , "addon.json" ) );
-			AddonInfo addonInfo = new AddonInfo();
+
+			//in case of re-extraction, we don't want to overwrite a manually written json for whatever reason
+			AddonInfo addonInfo = OpenJSON( jsonFileInfo ) ?? new AddonInfo();
 
 			bool success = Addon.Extract( inputStream , ( filePath ) =>
 			{
@@ -199,7 +207,7 @@ namespace Gmad.CLI
 
 				if( !outputFileInfo.FullName.Contains( folderOutput.FullName ) )
 				{
-					throw new Exception( $"Addon extraction somehow ended up outside main folder {outputFileInfo.FullName}" );
+					throw new IOException( $"Addon extraction somehow ended up outside main folder {outputFileInfo.FullName}" );
 				}
 
 				var fileStream = outputFileInfo.OpenWrite();
@@ -225,13 +233,18 @@ namespace Gmad.CLI
 
 		private static AddonInfo OpenJSON( FileInfo jsonFile )
 		{
+			if( !jsonFile.Exists )
+			{
+				return null;
+			}
+
 			using var fileStream = jsonFile.OpenRead();
 			return Addon.LoadAddonInfo( fileStream );
 		}
 
 		private static void SaveJSON( FileInfo jsonFile , AddonInfo addonInfo )
 		{
-			using var fileStream = jsonFile.OpenWrite();
+			using var fileStream = jsonFile.CreateText();
 
 			Addon.SaveAddonInfo( addonInfo , fileStream );
 		}

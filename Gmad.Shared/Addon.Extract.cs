@@ -103,7 +103,11 @@ namespace Gmad.Shared
 
 				uint addoncrc = reader.ReadUInt32(); //not used during the extraction of gmas
 
+				
 				addonInfo.Title = gmadTitle;
+
+				//the term populate here is correct, we don't want to override it again as the object might be one
+				//passed from an existing file already
 				PopulateFromDescription( addonInfo , gmadAddonJson );
 
 			}

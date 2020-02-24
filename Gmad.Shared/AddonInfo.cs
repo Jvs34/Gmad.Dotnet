@@ -20,7 +20,7 @@ namespace Gmad.Shared
 		/// The logo image, this is a relative path
 		/// </summary>
 		[JsonProperty( "logo" )] public string LogoImage { get; set; }
-		[JsonProperty( "tags" )] public List<string> Tags { get; set; }
-		[JsonProperty( "ignore" )] public List<string> IgnoreWildcard { get; set; }
+		[JsonProperty( "tags" )] public HashSet<string> Tags { get; set; }
+		[JsonProperty( "ignore" )] public HashSet<string> IgnoreWildcard { get; set; }
 	}
 }

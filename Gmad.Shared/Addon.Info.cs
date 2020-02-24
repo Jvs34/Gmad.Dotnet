@@ -24,9 +24,9 @@ namespace Gmad.Shared
 			return addonInfo;
 		}
 
-		public static void SaveAddonInfo( AddonInfo addonInfo , Stream outputStream )
+		public static void SaveAddonInfo( AddonInfo addonInfo , TextWriter outputStream )
 		{
-			using( var writer = new StreamWriter( outputStream ) )
+			using( var writer = new JsonTextWriter( outputStream ) )
 			{
 				JsonSerializer.Serialize( writer , addonInfo );
 			}

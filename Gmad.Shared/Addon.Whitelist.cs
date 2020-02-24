@@ -7,6 +7,18 @@ namespace Gmad.Shared
 {
 	public static partial class Addon
 	{
+		/// <summary>
+		/// Check this before the addon's ignore list, because gmad's code does it in a hardcoded way
+		/// </summary>
+		public static IReadOnlyList<string> DefaultIgnores { get; } = new List<string>()
+		{
+			"addon.json",
+			"*thumbs.db",
+			"*desktop.ini",
+			".DS_Store",
+			"*/.DS_Store"
+		};
+
 		public static IReadOnlyList<string> Wildcards { get; } = new List<string>()
 		{
 			"lua/*.lua",
@@ -67,14 +79,19 @@ namespace Gmad.Shared
 			"gamemodes/*/content/sound/*.ogg",
 		};
 
-		public static bool IsPathAllowed( string path )
+		/// <summary>
+		/// Calls <see cref="IsWildcardMatching"/> with Addon.Wildcards to check if the path is allowed
+		/// </summary>
+		/// <param name="relativePath">the filesystem path relative to the addon folder </param>
+		/// <returns></returns>
+		public static bool IsPathAllowed( string relativePath )
 		{
-			return IsWildcardMatching( path , Wildcards );
+			return IsWildcardMatching( relativePath , Wildcards );
 		}
 
-		public static bool IsWildcardMatching( string path , IEnumerable<string> wildcardList )
+		public static bool IsWildcardMatching( string relativePath , IEnumerable<string> wildcardList )
 		{
-			return wildcardList?.Any( wildcard => IsWildcardMatching( path , wildcard ) ) == true;
+			return wildcardList?.Any( wildcard => IsWildcardMatching( relativePath , wildcard ) ) == true;
 		}
 
 		/// <summary>
@@ -130,52 +147,6 @@ namespace Gmad.Shared
 			}
 
 			return wildIndex >= wildcard.Length;
-
-			/*
-				const char *cp = 0, *mp = 0;
-
-				while ((*string) && (*wild != '*')) {
-					if ((*wild != *string) && (*wild != '?')) {
-						return false;
-					}
-					wild++;
-					string++;
-				}
-			 */
-
-			/*
-			 * globber( const char * string , const char * wild )
-			const char *cp = 0, *mp = 0;
-
-			while ((*string) && (*wild != '*')) {
-				if ((*wild != *string) && (*wild != '?')) {
-					return false;
-				}
-				wild++;
-				string++;
-			}
-
-			while (*string) {
-				if (*wild == '*') {
-					if (!*++wild) {
-						return true;
-					}
-					mp = wild;
-					cp = string+1;
-				} else if ((*wild == *string) || (*wild == '?')) {
-					wild++;
-					string++;
-				} else {
-					wild = mp;
-					string = cp++;
-				}
-			}
-
-			while (*wild == '*') {
-				wild++;
-			}
-			return !*wild;
-			*/
 		}
 	}
 }
