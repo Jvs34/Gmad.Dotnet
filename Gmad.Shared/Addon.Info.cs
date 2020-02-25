@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Gmad.Shared
 {
@@ -14,7 +15,14 @@ namespace Gmad.Shared
 			//populate tags description and type only
 			addonInfo.Description = newAddonInfo.Description;
 			addonInfo.WorkshopType = newAddonInfo.WorkshopType;
-			addonInfo.Tags.UnionWith( newAddonInfo.Tags );
+			if( addonInfo.Tags != null )
+			{
+				addonInfo.Tags.UnionWith( newAddonInfo.Tags );
+			}
+			else
+			{
+				addonInfo.Tags = new HashSet<string>( newAddonInfo.Tags );
+			}
 		}
 
 		private static string CreateJsonDescription( AddonInfo addonInfo )
