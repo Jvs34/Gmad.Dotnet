@@ -5,12 +5,13 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Epoch.net;
+using System.Threading.Tasks;
 
 namespace Gmad.Shared
 {
 	public static partial class Addon
 	{
-		public static bool Create( Dictionary<string , Stream> files , Stream outputStream , AddonInfo addonInfo )
+		public static async Task<bool> Create( Dictionary<string , Stream> files , Stream outputStream , AddonInfo addonInfo )
 		{
 			var orderedFiles = files.OrderBy( kv => kv.Key );
 
@@ -54,7 +55,7 @@ namespace Gmad.Shared
 				{
 					var stream = filesToAdd.Value;
 					stream.Position = 0;
-					stream.CopyToLimited( outputStream , stream.Length );
+					await stream.CopyToLimitedAsync( outputStream , stream.Length );
 				}
 
 				//don't write CRC32 as it's not used anywhere

@@ -11,7 +11,6 @@ namespace Gmad.CLI
 {
 	internal static class Program
 	{
-
 		private static async Task<int> Main( string[] args )
 		{
 			Shared.Addon.DeserializeAddonInfoCallback = AddonHandling.DeserializeAddonInfo;
@@ -78,28 +77,25 @@ namespace Gmad.CLI
 
 		private static async Task<int> CreateAddonFileCommand( DirectoryInfo folder , FileInfo @out , bool warninvalid = false )
 		{
-			await Task.CompletedTask;
-			return AddonHandling.CreateAddonFile( folder , @out , warninvalid );
+			return await AddonHandling.CreateAddonFile( folder , @out , warninvalid );
 		}
 
 		private static async Task<int> ExtractAddonFileCommand( FileInfo file , DirectoryInfo @out , bool warninvalid = false )
 		{
-			await Task.CompletedTask;
-			return AddonHandling.ExtractAddonFile( file , @out , warninvalid );
+			return await AddonHandling.ExtractAddonFile( file , @out , warninvalid );
 		}
 
 		private static async Task<int> HandleDragAndDropCommand( FileSystemInfo target )
 		{
-			await Task.CompletedTask;
 			switch( target )
 			{
 				case FileInfo file:
 				{
-					return AddonHandling.ExtractAddonFile( file , new DirectoryInfo( "" ) );
+					return await AddonHandling.ExtractAddonFile( file , new DirectoryInfo( "" ) );
 				}
 				case DirectoryInfo folder:
 				{
-					return AddonHandling.CreateAddonFile( folder , new FileInfo( "" ) );
+					return await AddonHandling.CreateAddonFile( folder , new FileInfo( "" ) );
 				}
 				default:
 				{

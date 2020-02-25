@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace Gmad.Shared
 {
@@ -16,7 +17,7 @@ namespace Gmad.Shared
 		/// <param name="requestFileStream">the callback to write the output file to</param>
 		/// <param name="addonInfo"> the addon info object to feed info to, saving this is at your discretion</param>
 		/// <returns></returns>
-		public static bool Extract( Stream inputStream , Func<string , Stream> requestFileStream , AddonInfo addonInfo )
+		public static async Task<bool> Extract( Stream inputStream , Func<string , Stream> requestFileStream , AddonInfo addonInfo )
 		{
 			inputStream.Position = 0;
 
@@ -97,7 +98,7 @@ namespace Gmad.Shared
 					if( stream != null )
 					{
 						inputStream.Position = gmadFileblock + entry.Offset;
-						inputStream.CopyToLimited( stream , entry.Size );
+						await inputStream.CopyToLimitedAsync( stream , entry.Size );
 					}
 				}
 
@@ -109,11 +110,7 @@ namespace Gmad.Shared
 				//the term populate here is correct, we don't want to override it again as the object might be one
 				//passed from an existing file already
 				PopulateFromDescription( addonInfo , gmadAddonJson );
-
 			}
-
-
-
 
 
 			return true;

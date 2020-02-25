@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Gmad.CLI
 {
@@ -16,7 +17,7 @@ namespace Gmad.CLI
 			ContractResolver = new AddonInfoContractResolver() ,
 		};
 
-		internal static int CreateAddonFile( DirectoryInfo folder , FileInfo fileOutput , bool warninvalid = false )
+		internal static async Task<int> CreateAddonFile( DirectoryInfo folder , FileInfo fileOutput , bool warninvalid = false )
 		{
 			if( fileOutput is null )
 			{
@@ -77,7 +78,7 @@ namespace Gmad.CLI
 
 			using( var outputStream = fileOutput.OpenWrite() )
 			{
-				success = Addon.Create( files , outputStream , addonInfo );
+				success = await Addon.Create( files , outputStream , addonInfo );
 			}
 
 			foreach( var kv in files )
@@ -94,7 +95,7 @@ namespace Gmad.CLI
 			return Convert.ToInt32( !success );
 		}
 
-		internal static int ExtractAddonFile( FileInfo file , DirectoryInfo folderOutput , bool warninvalid = false )
+		internal static async Task<int> ExtractAddonFile( FileInfo file , DirectoryInfo folderOutput , bool warninvalid = false )
 		{
 			if( folderOutput == null )
 			{
@@ -115,7 +116,7 @@ namespace Gmad.CLI
 			//in case of re-extraction, we don't want to overwrite a manually written json for whatever reason
 			AddonInfo addonInfo = OpenAddonInfo( jsonFileInfo ) ?? new AddonInfo();
 
-			bool success = Addon.Extract( gmadFileStream , ( filePath ) =>
+			bool success = await Addon.Extract( gmadFileStream , ( filePath ) =>
 			{
 				var outputFileInfo = new FileInfo( Path.Combine( folderOutput.FullName , filePath ) );
 
