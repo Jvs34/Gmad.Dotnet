@@ -6,7 +6,7 @@ namespace Gmad.Shared
 	public static partial class Addon
 	{
 		public static Func<string , AddonInfo> DeserializeAddonInfoCallback { get; set; }
-		public static Func<AddonInfo ,string > SerializeAddonInfoToStringCallback { get; set; }
+		public static Func<AddonInfo , string> SerializeAddonInfoToStringCallback { get; set; }
 
 		private static void PopulateFromDescription( AddonInfo addonInfo , string gmadAddonJson )
 		{
@@ -27,7 +27,12 @@ namespace Gmad.Shared
 
 		private static string CreateJsonDescription( AddonInfo addonInfo )
 		{
-			return SerializeAddonInfoToStringCallback( addonInfo );
+			return SerializeAddonInfoToStringCallback( new AddonInfo()
+			{
+				Description = addonInfo.Description ,
+				Tags = addonInfo.Tags ,
+				WorkshopType = addonInfo.WorkshopType
+			} );
 		}
 	}
 }
