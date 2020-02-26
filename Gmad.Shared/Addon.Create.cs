@@ -1,10 +1,9 @@
-﻿using Gmad.Shared.Extensions;
+﻿using Epoch.net;
+using Gmad.Shared.Extensions;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using Epoch.net;
 using System.Threading.Tasks;
 
 namespace Gmad.Shared

@@ -38,7 +38,7 @@ namespace Gmad.Shared
 				ulong steamid = reader.ReadUInt64(); //steamid
 				ulong timestamp = reader.ReadUInt64(); //timestamp
 
-				var timeUpdated = new EpochTime( (int) timestamp ).DateTime;
+				var timeUpdated = new EpochTime( ( int ) timestamp ).DateTime;
 
 				if( gmadFormatVersion > 1 )
 				{
@@ -104,7 +104,7 @@ namespace Gmad.Shared
 
 				uint addoncrc = reader.ReadUInt32(); //not used during the extraction of gmas
 
-				
+
 				addonInfo.Title = gmadTitle;
 
 				//the term populate here is correct, we don't want to override it again as the object might be one
