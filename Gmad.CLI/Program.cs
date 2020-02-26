@@ -91,18 +91,16 @@ namespace Gmad.CLI
 			{
 				case FileInfo file:
 				{
-					return await AddonHandling.ExtractAddonFile( file , new DirectoryInfo( "" ) );
+					return await AddonHandling.ExtractAddonFile( file , null );
 				}
 				case DirectoryInfo folder:
 				{
-					return await AddonHandling.CreateAddonFile( folder , new FileInfo( "" ) );
-				}
-				default:
-				{
-					Console.Error.WriteLine( "Cannot handle drag and drop action." );
-					return 1;
+					return await AddonHandling.CreateAddonFile( folder , null );
 				}
 			}
+
+			Console.Error.WriteLine( "Cannot handle drag and drop action." );
+			return 1;
 		}
 	}
 }

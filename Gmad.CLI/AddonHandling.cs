@@ -99,7 +99,7 @@ namespace Gmad.CLI
 		{
 			if( folderOutput == null )
 			{
-				folderOutput = new DirectoryInfo( Path.GetFileNameWithoutExtension( file.FullName ) );
+				folderOutput = new DirectoryInfo( Path.Combine( file.Directory.FullName , Path.GetFileNameWithoutExtension( file.FullName ) ) );
 			}
 
 			if( !folderOutput.Exists )
@@ -116,9 +116,10 @@ namespace Gmad.CLI
 			//in case of re-extraction, we don't want to overwrite a manually written json for whatever reason
 			AddonInfo addonInfo = OpenAddonInfo( jsonFileInfo ) ?? new AddonInfo();
 
-			bool success = await Addon.Extract( gmadFileStream , ( filePath ) =>
+			bool success = await Addon.Extract( gmadFileStream , ( relativeFilePath ) =>
 			{
-				var outputFileInfo = new FileInfo( Path.Combine( folderOutput.FullName , filePath ) );
+				Console.WriteLine( $"Extracting {relativeFilePath}" );
+				var outputFileInfo = new FileInfo( Path.Combine( folderOutput.FullName , relativeFilePath ) );
 
 				//create the subfolder first
 
@@ -126,12 +127,12 @@ namespace Gmad.CLI
 
 				if( !outputFileInfo.FullName.StartsWith( folderOutput.FullName ) )
 				{
-					throw new IOException( $"Addon extraction somehow ended up outside main folder {outputFileInfo.FullName}" );
+					throw new IOException( $"Addon extraction somehow ended up outside main folder {outputFileInfo.FullName}, the relative path was {relativeFilePath}" );
 				}
 
 				var fileStream = outputFileInfo.OpenWrite();
 
-				files.Add( filePath , fileStream );
+				files.Add( relativeFilePath , fileStream );
 
 				return fileStream;
 			} , addonInfo );
