@@ -5,7 +5,6 @@ using System.CommandLine.Invocation;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
 
 namespace Gmad.CLI
 {

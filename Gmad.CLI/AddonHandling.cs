@@ -1,20 +1,20 @@
 ﻿using Gmad.Shared;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace Gmad.CLI
 {
 	internal static class AddonHandling
 	{
-		private static JsonSerializer AddonJsonSerializer { get; } = new JsonSerializer()
+		private static JsonSerializerOptions SerializerOptions { get; } = new JsonSerializerOptions()
 		{
-			Formatting = Formatting.Indented ,
-			NullValueHandling = NullValueHandling.Ignore ,
-			ContractResolver = new AddonInfoContractResolver() ,
+			WriteIndented = true ,
+			IgnoreNullValues = true ,
+			PropertyNamingPolicy = new AddonInfoContractResolver() ,
 		};
 
 		internal static async Task<int> CreateAddonFile( DirectoryInfo folder , FileInfo fileOutput , bool warninvalid = false )
@@ -26,7 +26,7 @@ namespace Gmad.CLI
 
 			var jsonFileInfo = new FileInfo( Path.Combine( folder.FullName , "addon.json" ) );
 
-			AddonInfo addonInfo = OpenAddonInfo( jsonFileInfo );
+			AddonInfo addonInfo = await OpenAddonInfo( jsonFileInfo );
 
 			//open every file in the folder, then feed it as a string:stream dictionary
 			Dictionary<string , Stream> files = new Dictionary<string , Stream>();
@@ -114,7 +114,7 @@ namespace Gmad.CLI
 			var jsonFileInfo = new FileInfo( Path.Combine( folderOutput.FullName , "addon.json" ) );
 
 			//in case of re-extraction, we don't want to overwrite a manually written json for whatever reason
-			AddonInfo addonInfo = OpenAddonInfo( jsonFileInfo ) ?? new AddonInfo();
+			AddonInfo addonInfo = await OpenAddonInfo( jsonFileInfo ) ?? new AddonInfo();
 
 			bool success = await Addon.Extract( gmadFileStream , ( relativeFilePath ) =>
 			{
@@ -150,7 +150,7 @@ namespace Gmad.CLI
 			return Convert.ToInt32( !success );
 		}
 
-		private static AddonInfo OpenAddonInfo( FileInfo jsonFile )
+		private static async Task<AddonInfo> OpenAddonInfo( FileInfo jsonFile )
 		{
 			if( !jsonFile.Exists )
 			{
@@ -159,43 +159,24 @@ namespace Gmad.CLI
 
 			using var fileStream = jsonFile.OpenRead();
 
-			AddonInfo addonInfo = new AddonInfo();
-
-			using( var reader = new StreamReader( fileStream ) )
-			using( var jsonReader = new JsonTextReader( reader ) )
-			{
-				addonInfo = AddonJsonSerializer.Deserialize<AddonInfo>( jsonReader );
-			}
-
-			return addonInfo;
+			return await JsonSerializer.DeserializeAsync<AddonInfo>( fileStream , SerializerOptions );
 		}
 
 		internal static void SaveAddonInfo( FileInfo jsonFile , AddonInfo addonInfo )
 		{
-			using var fileStream = jsonFile.CreateText();
+			using var fileStream = jsonFile.OpenWrite();
 
-			using( var writer = new JsonTextWriter( fileStream ) )
-			{
-				AddonJsonSerializer.Serialize( writer , addonInfo );
-			}
+			JsonSerializer.SerializeAsync( fileStream , addonInfo , SerializerOptions );
 		}
 
 		internal static string SerializeAddonInfoToString( AddonInfo addonInfo )
 		{
-			var stringOutputBuilder = new StringBuilder();
-			using( var stringWriter = new StringWriter( stringOutputBuilder ) )
-			using( var jsonWriter = new JsonTextWriter( stringWriter ) )
-			{
-				AddonJsonSerializer.Serialize( jsonWriter , addonInfo );
-			}
-			return stringOutputBuilder.ToString();
+			return JsonSerializer.Serialize<AddonInfo>( addonInfo , SerializerOptions );
 		}
 
 		internal static AddonInfo DeserializeAddonInfo( string jsonStr )
 		{
-			using var reader = new StringReader( jsonStr );
-			using var jsonReader = new JsonTextReader( reader );
-			return AddonJsonSerializer.Deserialize<AddonInfo>( jsonReader );
+			return JsonSerializer.Deserialize<AddonInfo>( jsonStr , SerializerOptions );
 		}
 	}
 }

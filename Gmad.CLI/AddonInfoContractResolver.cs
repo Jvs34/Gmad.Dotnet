@@ -1,14 +1,13 @@
 ﻿using Gmad.Shared;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
 using System.Text;
+using System.Text.Json;
 
 namespace Gmad.CLI
 {
-	internal class AddonInfoContractResolver : DefaultContractResolver
+	internal class AddonInfoContractResolver : JsonNamingPolicy
 	{
 		private static Dictionary<string , string> MemberNames { get; } = new Dictionary<string , string>()
 		{
@@ -21,13 +20,14 @@ namespace Gmad.CLI
 			{ nameof( AddonInfo.IgnoreWildcard ) , "ignore" },
 		};
 
-		protected override string ResolvePropertyName( string propertyName )
+		public override string ConvertName( string propertyName )
 		{
 			if( MemberNames.TryGetValue( propertyName , out string newPropertyName ) )
 			{
-				return base.ResolvePropertyName( newPropertyName );
+				propertyName = newPropertyName;
 			}
-			return string.Empty;
+
+			return propertyName;
 		}
 	}
 }
