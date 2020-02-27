@@ -1,5 +1,8 @@
 {
   "profiles": {
+    "Gmad.CLI": {
+      "commandName": "Project"
+    },
     "Create": {
       "commandName": "Project",
       "commandLineArgs": "create -folder \"E:/Games/Steam/steamapps/common/GarrysMod/garrysmod/addons/gmod_soccerball\" -out \"E:/gmod_soccerball.gma\" -warninvalid"
@@ -7,6 +10,14 @@
     "Extract": {
       "commandName": "Project",
       "commandLineArgs": "extract -file \"E:/Games/Steam/steamapps/common/GarrysMod/garrysmod/addons/soccer_ball_293904092.gma\" -out \"E:/gmod_soccerball/\""
+    },
+    "Help": {
+      "commandName": "Project",
+      "commandLineArgs": "-help"
+    },
+    "DragAndDrop": {
+      "commandName": "Project",
+      "commandLineArgs": "\"C:/Users/Jvsth.000.000/Desktop/Fc/soccer_ball_293904092.gma\""
     }
   }
 }
