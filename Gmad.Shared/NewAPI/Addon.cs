@@ -2,6 +2,7 @@
 using System.IO;
 using System.Threading.Tasks;
 
+#if NEWAPI
 namespace Gmad.Shared.NewAPI
 {
 	public class Addon
@@ -57,3 +58,4 @@ namespace Gmad.Shared.NewAPI
 		}
 	}
 }
+#endif

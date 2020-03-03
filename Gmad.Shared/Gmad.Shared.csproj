@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <Description>Allows you to use gmad features with Stream based inputs and outputs.</Description>
   </PropertyGroup>
 
   <ItemGroup>

@@ -3,6 +3,12 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>gmad</ToolCommandName>
+    <PackageOutputPath>./nupkg</PackageOutputPath>
+    <Authors>Jvs</Authors>
+    <Description>The implementation of Gmad.Shared to replace the c++ gmad.
+The memory footprint should much lower compared to the base gmad as almost nothing is copied into memory during extraction and creation of gmad files.</Description>
   </PropertyGroup>
   
   <ItemGroup>
