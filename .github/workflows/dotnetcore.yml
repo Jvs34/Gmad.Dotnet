@@ -10,15 +10,16 @@ jobs:
     - uses: actions/setup-dotnet@v1
       with:
         dotnet-version: '3.1.100'
-        source-url: https://nuget.pkg.github.com/Jvs34/index.json
-      env:
-        NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
     - run: dotnet restore
     - name: Building the projects
       run: dotnet build --configuration Release
     - name: Create the packages
       run: dotnet pack --configuration Release
     - name: Publish Gmad.CLI to GPR
-      run: dotnet nuget push Gmad.CLI/nupkg/*.nupkg
+      env:
+        NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+      run: dotnet nuget push Gmad.CLI/nupkg/*.nupkg -s https://nuget.pkg.github.com/Jvs34/index.json -k $NUGET_AUTH_TOKEN
     - name: Publish Gmad.Shared to GPR
-      run: dotnet nuget push Gmad.Shared/bin/Release/*.nupkg -k $NUGET_AUTH_TOKEN
+      env:
+        NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
+      run: dotnet nuget push Gmad.Shared/bin/Release/*.nupkg -s https://nuget.pkg.github.com/Jvs34/index.json -k $NUGET_AUTH_TOKEN
