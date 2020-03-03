@@ -21,4 +21,4 @@ jobs:
     - name: Publish Gmad.CLI to GPR
       run: dotnet nuget push Gmad.CLI/nupkg/*.nupkg
     - name: Publish Gmad.Shared to GPR
-      run: dotnet nuget push Gmad.Shared/bin/Release/*.nupkg
+      run: dotnet nuget push Gmad.Shared/bin/Release/*.nupkg -k $NUGET_AUTH_TOKEN
