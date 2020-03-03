@@ -4,9 +4,7 @@ on: [push]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@master
     - uses: actions/setup-dotnet@v1
@@ -15,7 +13,11 @@ jobs:
         source-url: https://nuget.pkg.github.com/Jvs34/index.json
       env:
         NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
-    - run: dotnet build Gmad.Shared/Gmad.Shared.csproj --configuration Release
+ 
+    - name: Restoring packages
+      run: dotnet restore
+    - name: Building the projects
+    - run: dotnet build --configuration Release
     - name: Create the packages
       run: dotnet pack --configuration Release
     - name: Publish the package to GPR
