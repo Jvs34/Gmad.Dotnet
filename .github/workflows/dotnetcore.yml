@@ -18,5 +18,7 @@ jobs:
       run: dotnet build --configuration Release
     - name: Create the packages
       run: dotnet pack --configuration Release
-    - name: Publish the package to GPR
-      run: dotnet nuget push *.nupkg
+    - name: Publish Gmad.CLI to GPR
+      run: dotnet nuget push Gmad.CLI/nupkg/*.nupkg
+    - name: Publish Gmad.Shared to GPR
+      run: dotnet nuget push Gmad.Shared/bin/Release/*.nupkg
