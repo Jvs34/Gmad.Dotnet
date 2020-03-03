@@ -13,11 +13,9 @@ jobs:
         source-url: https://nuget.pkg.github.com/Jvs34/index.json
       env:
         NUGET_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
- 
-    - name: Restoring packages
-      run: dotnet restore
+    - run: dotnet restore
     - name: Building the projects
-    - run: dotnet build --configuration Release
+      run: dotnet build --configuration Release
     - name: Create the packages
       run: dotnet pack --configuration Release
     - name: Publish the package to GPR
