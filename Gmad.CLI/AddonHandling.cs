@@ -129,9 +129,17 @@ namespace Gmad.CLI
 					throw new IOException( $"Addon extraction somehow ended up outside main folder {outputFileInfo.FullName}, the relative path was {relativeFilePath}" );
 				}
 
-				var fileStream = outputFileInfo.OpenWrite();
+				Stream fileStream = null;
 
-				files.Add( relativeFilePath , fileStream );
+				try
+				{
+					fileStream = outputFileInfo.OpenWrite();
+					files.Add( relativeFilePath , fileStream );
+				}
+				catch( Exception )
+				{
+					Console.WriteLine( $"Could not open {relativeFilePath} for writing" );
+				}
 
 				return fileStream;
 			} , addonInfo );

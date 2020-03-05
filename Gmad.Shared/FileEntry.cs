@@ -38,5 +38,15 @@ namespace Gmad.Shared
 			hashCode = hashCode * -1521134295 + Offset.GetHashCode();
 			return hashCode;
 		}
+
+		public static bool operator ==( FileEntry left , FileEntry right )
+		{
+			return left.Equals( right );
+		}
+
+		public static bool operator !=( FileEntry left , FileEntry right )
+		{
+			return !( left == right );
+		}
 	}
 }
